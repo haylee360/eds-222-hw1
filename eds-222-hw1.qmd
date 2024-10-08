@@ -37,11 +37,6 @@ library(tidyverse)
 
 Load the data from each source and label it as `crowdsourced` and `govt` accordingly. For example:
 
-``` r
-crowdsourced <- readRDS(file.path("data", "airpol-PK-crowdsourced.RDS"))
-govt <- readRDS(file.path("data", "airpol-PK-govt.RDS"))
-```
-
 ```{r}
 crowdsourced <- readRDS(file.path("data", "airpol-PK-crowdsourced.RDS"))
 govt <- readRDS(file.path("data", "airpol-PK-govt.RDS"))
@@ -57,14 +52,25 @@ The implicit assumption is that you have placed the data files in a folder calle
 dim(crowdsourced)
 dim(govt)
 ```
-crowdsourced as 5488 records and govt has 1960 records. 
+crowdsourced has 5488 records and govt has 1960 records. 
 
 2.  Each monitor is located at a unique latitude and longitude location. How many unique monitors are in each dataset?
 ```{r}
-crowdsourced %>% 
-  group_by(longitude, latitude) 
-```
+# Calcualte unique monitors for crowdsourced dataset
+crowdsourced <- crowdsourced %>% 
+  group_by(longitude, latitude) %>% 
+  mutate(group_id = cur_group_id())
 
+length(unique(crowdsourced$group_id))
+
+# Calcualte unique monitors for govt dataset
+govt <- govt %>% 
+  group_by(longitude, latitude) %>% 
+  mutate(group_id = cur_group_id())
+
+length(unique(govt$group_id))
+```
+crowdsourced has 14 monitors and govt has 5
 
 
 ::: callout-tip
@@ -77,6 +83,8 @@ The goal of pollution monitoring in Lahore is to measure the average pollution c
 
 1.  What is the *population* in this setting? Please be precise.
 
+The population is the 
+
 2.  What are the *samples* in this setting? Please be precise.
 
 3.  These samples were not randomly collected from across locations in Lahore. Given the sampling approaches described above, discuss possible biases that may enter when we use these samples to construct estimates of population parameters.
@@ -84,12 +92,47 @@ The goal of pollution monitoring in Lahore is to measure the average pollution c
 ### Question 3
 
 1.  For both the government data and the crowd-sourced data, report the sample mean, sample minimum, and sample maximum value of PM 2.5 (measured in $\mu g/m^3$).
+
+```{r}
+
+summary(crowdsourced$PM)
+summary(govt$PM)
+```
+The crowdsourced data sample mean = 70.2, sample minimum = 20, and sample maximum = 120
+
+The govt data sample mean = 39.65, sample minimum = 15, and sample maximum = 65
+
 2.  Discuss any key differences that you see between these two samples.
+
+The crowdsourced sample mean and maximum are much higher than the government sample mean and maximum, nearly double in value. 
+
 3.  Are the differences in mean pollution as expected, given what we know about the sampling strategies?
+
+
 
 ### Question 4
 
 Use the location of the air pollution stations for both of the sampling strategies to generate a map showing locations of each observation. Color the two samples with different colors to highlight how each sample obtains measurements from different parts of the city.
+
+```{r}
+# Adding a column for data source and combining the data frames
+govt <- govt %>% 
+  mutate(data_source = "govt")
+
+crowdsourced <- crowdsourced %>% 
+  mutate(data_source = "crowdsourced")
+
+comb_df <- rbind(govt, crowdsourced)
+
+```
+
+
+```{r}
+ggplot(comb_df) +
+  geom_point(aes(x = longitude, y = latitude, color = data_source)) +
+  theme_bw()
+
+```
 
 ::: callout-tip
 `longitude` indicates location in the *x*-direction, while `latitude` indicates location in the *y*-direction. With `ggplot2` this should be nothing fancy. We'll do more spatial data in `R` later in the course.
@@ -98,6 +141,8 @@ Use the location of the air pollution stations for both of the sampling strategi
 ### Question 5
 
 The local newspaper in Pakistan, *Dawn*, claims that the government is misreporting the air pollution levels in Lahore. Do the locations of monitors in question 4, relative to crowd-sourced monitors, suggest anything about a possible political bias?
+
+Yes, all of the government monitors are located very close to each other around 74.325 and 31.58. This is not an accurate representation of the entire population of Lahore, given the narrow geographic range the government monitors cover. 
 
 ### Question 6
 
