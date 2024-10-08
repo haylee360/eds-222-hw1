@@ -1,7 +1,10 @@
 ---
 title: "EDS 222: Homework 1"
-date: "Assigned ???, due ???"
-author: "Your Name Here"
+date: "Assigned 10/7, due 10/14"
+author: "Haylee Oyler"
+execute: 
+  warning: false
+  message: false
 ---
 
 ## Background
@@ -24,6 +27,12 @@ In answering the following questions, please consider the lecture content from c
 
 ## Assessment
 
+#### Load packages
+```{r}
+library(tidyverse)
+```
+
+
 ### Question 1
 
 Load the data from each source and label it as `crowdsourced` and `govt` accordingly. For example:
@@ -33,12 +42,30 @@ crowdsourced <- readRDS(file.path("data", "airpol-PK-crowdsourced.RDS"))
 govt <- readRDS(file.path("data", "airpol-PK-govt.RDS"))
 ```
 
+```{r}
+crowdsourced <- readRDS(file.path("data", "airpol-PK-crowdsourced.RDS"))
+govt <- readRDS(file.path("data", "airpol-PK-govt.RDS"))
+```
+
 ::: callout-warning
 There's an implicit assumption about file organization in the code above. What is it? How can you make the code work?
+The implicit assumption is that you have placed the data files in a folder called "data". 
 :::
 
 1.  These dataframes have one row per pollution observation. How many pollution records are in each dataset?
+```{r}
+dim(crowdsourced)
+dim(govt)
+```
+crowdsourced as 5488 records and govt has 1960 records. 
+
 2.  Each monitor is located at a unique latitude and longitude location. How many unique monitors are in each dataset?
+```{r}
+crowdsourced %>% 
+  group_by(longitude, latitude) 
+```
+
+
 
 ::: callout-tip
 `group_by(longitude,latitude)` and `cur_group_id()` in `dplyr` will help in creating a unique identifier for each (longitude, latitude) pair.
