@@ -134,6 +134,7 @@ comb_df <- rbind(govt, crowdsourced)
 
 
 ```{r}
+# Plot both types of monitors by location
 ggplot(comb_df) +
   geom_point(aes(x = longitude, y = latitude, color = data_source)) +
   theme_bw()
@@ -161,12 +162,7 @@ NASA's satellite data indicates that the average PM across Lahore is 89.2 $\mu g
 First, generate a *random sample* of size $n=1000$ air pollution records by (i) pooling observations across the government and the crowd-sourced data; and (ii) drawing observations at random from this pooled sample.
 
 ```{r}
-# Ungroup previous data frame
-comb_df <- comb_df %>% 
-  ungroup()
 
-# Generate random sample
-rand_samp_all <- sample_n(comb_df, 1000)
 ```
 
 
@@ -177,24 +173,27 @@ rand_samp_all <- sample_n(comb_df, 1000)
 Second, create a *stratified random sample*. Do so by (i) stratifying your pooled data-set into strata of 0.01 degrees of latitude, and (ii) randomly sampling 200 air pollution observations from each stratum.
 
 ```{r}
+# Ungroup previous data frame
+# comb_df <- comb_df %>% 
+#   ungroup()
+
 # Round latitudes
-sample_round <- rand_samp_all  %>% 
+round_comb <- comb_df  %>% 
   mutate(lat_round = round(latitude, digits = 2))
-```
 
-
-```{r}
-# Given number of samples per 0.1 change in latitude
-# There are 200 observations per each unique latitude (5)
-strata_sample <- sample_round %>% 
+# Group by lat_round to create strata 
+# Slice sample randomly selects rows
+strata_comb <- round_comb %>% 
   group_by(lat_round) %>% 
   slice_sample(n = 200)
 
-summary(strata_sample)
-
 # Check visually
-ggplot(strata_sample) +
-  geom_bar(aes(x = lat_round))
+ggplot(strata_comb) +
+  geom_bar(aes(x = lat_round)) +
+  theme_minimal()
+
+# Find mean
+mean(strata_sample$PM)
 ```
 
 #### Question 6.2
