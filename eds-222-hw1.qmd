@@ -44,7 +44,8 @@ govt <- readRDS(file.path("data", "airpol-PK-govt.RDS"))
 
 ::: callout-warning
 There's an implicit assumption about file organization in the code above. What is it? How can you make the code work?
-The implicit assumption is that you have placed the data files in a folder called "data". 
+
+- The implicit assumption is that you have placed the data files in a folder called "data". 
 :::
 
 1.  These dataframes have one row per pollution observation. How many pollution records are in each dataset?
@@ -83,18 +84,20 @@ The goal of pollution monitoring in Lahore is to measure the average pollution c
 
 1.  What is the *population* in this setting? Please be precise.
 
-The population is the 
+The population is the air quality (PM 2.5) of the city of Lahore. 
 
 2.  What are the *samples* in this setting? Please be precise.
 
 3.  These samples were not randomly collected from across locations in Lahore. Given the sampling approaches described above, discuss possible biases that may enter when we use these samples to construct estimates of population parameters.
+
+There could be sampling bias based on where the monitors are located. There could also be volunteer bias based on which households are more or less willing to have an air quality monitor in their homes. 
+
 
 ### Question 3
 
 1.  For both the government data and the crowd-sourced data, report the sample mean, sample minimum, and sample maximum value of PM 2.5 (measured in $\mu g/m^3$).
 
 ```{r}
-
 summary(crowdsourced$PM)
 summary(govt$PM)
 ```
@@ -154,11 +157,39 @@ NASA's satellite data indicates that the average PM across Lahore is 89.2 $\mu g
 
 First, generate a *random sample* of size $n=1000$ air pollution records by (i) pooling observations across the government and the crowd-sourced data; and (ii) drawing observations at random from this pooled sample.
 
+```{r}
+combined_data <- bind_rows(crowdsourced, govt, .id = ".id")
+
+comb_df <- comb_df %>% 
+  ungroup()
+
+rand_samp_all <- sample_n(comb_df, 1000)
+```
+
+
 ::: callout-tip
 `bind_rows()` may be helpful.
 :::
 
 Second, create a *stratified random sample*. Do so by (i) stratifying your pooled data-set into strata of 0.01 degrees of latitude, and (ii) randomly sampling 200 air pollution observations from each stratum.
+
+```{r}
+# Round latitudes
+sample_round <- combined_data %>% 
+  mutate(lat_round = round(latitude, digits = 2))
+```
+
+```{r}
+# Given number of samples per 0.1 change in latitude
+# There are 200 observations per each unique latitude (5)
+strata_sample <- sample_round %>% 
+  group_by(lat_round) %>% 
+  slice_sample(n = 200)
+
+# Check visually
+ggplot(strata_sample) +
+  geom_bar(aes(x = lat_round))
+```
 
 #### Question 6.2
 
