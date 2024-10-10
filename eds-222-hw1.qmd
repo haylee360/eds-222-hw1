@@ -88,6 +88,8 @@ The population is the air quality (PM 2.5) of the city of Lahore.
 
 2.  What are the *samples* in this setting? Please be precise.
 
+The samples are the observations from the government air quality monitors and the volunteer household air quality monitors
+
 3.  These samples were not randomly collected from across locations in Lahore. Given the sampling approaches described above, discuss possible biases that may enter when we use these samples to construct estimates of population parameters.
 
 There could be sampling bias based on where the monitors are located. There could also be volunteer bias based on which households are more or less willing to have an air quality monitor in their homes. 
@@ -111,6 +113,7 @@ The crowdsourced sample mean and maximum are much higher than the government sam
 
 3.  Are the differences in mean pollution as expected, given what we know about the sampling strategies?
 
+Yes, the differences are as expected given that we know the crowdsourced monitors are almost 3x more abundant than the government monitors. The larger the sample size, the more accurate the representation of population air quality will be. The higher PM 2.5 from the crowdsourced data makes sense given what we know about the poor air quality in Lahore. 
 
 
 ### Question 4
@@ -158,11 +161,13 @@ NASA's satellite data indicates that the average PM across Lahore is 89.2 $\mu g
 First, generate a *random sample* of size $n=1000$ air pollution records by (i) pooling observations across the government and the crowd-sourced data; and (ii) drawing observations at random from this pooled sample.
 
 ```{r}
-combined_data <- bind_rows(crowdsourced, govt, .id = ".id")
+# combined_data <- bind_rows(crowdsourced, govt, .id = ".id")
 
+# Ungroup previous data frame
 comb_df <- comb_df %>% 
   ungroup()
 
+# Generate random sample
 rand_samp_all <- sample_n(comb_df, 1000)
 ```
 
@@ -175,9 +180,10 @@ Second, create a *stratified random sample*. Do so by (i) stratifying your poole
 
 ```{r}
 # Round latitudes
-sample_round <- combined_data %>% 
+sample_round <- comb_df %>% 
   mutate(lat_round = round(latitude, digits = 2))
 ```
+
 
 ```{r}
 # Given number of samples per 0.1 change in latitude
@@ -194,3 +200,7 @@ ggplot(strata_sample) +
 #### Question 6.2
 
 Compare estimated means of PM 2.5 for each sampling strategy to the NASA estimate of 89.2 $\mu g/m^3$. Which sample seems to match the satellite data best? What would you recommend the Prime Minister do? Does your proposed sampling strategy rely more on government or on crowd-sourced data? Why might that be the case?
+
+
+
+
