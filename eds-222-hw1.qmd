@@ -5,6 +5,8 @@ author: "Haylee Oyler"
 execute: 
   warning: false
   message: false
+editor_options: 
+  chunk_output_type: console
 ---
 
 ## Background
@@ -165,32 +167,18 @@ NASA's satellite data indicates that the average PM across Lahore is 89.2 $\mu g
 
 First, generate a *random sample* of size $n=1000$ air pollution records by (i) pooling observations across the government and the crowd-sourced data; and (ii) drawing observations at random from this pooled sample.
 
-```{r}
-# and_samp_all <- sample_n(comb_df, 1000)
-```
-
-::: callout-tip
-`bind_rows()` may be helpful.
-:::
-
 Second, create a *stratified random sample*. Do so by (i) stratifying your pooled data-set into strata of 0.01 degrees of latitude, and (ii) randomly sampling 200 air pollution observations from each stratum.
 
-```{r}
- # slice_sample(n = 200, replace = FALSE, .by = )
-```
+**Here, I chose to use `slice_sample()` instead of `sample_n()` The `help` documentation recommends `slice_sample()` and mentions that `sample_n()` has been superseded.**
 
 ```{r}
 # Ungroup previous data frame
 comb_df <- comb_df %>% 
   ungroup()
 
-# Round latitudes
-round_comb <- comb_df  %>% 
-  mutate(lat_round = round(latitude, digits = 2))
-
-# Group by lat_round to create strata 
 # Slice sample randomly selects rows
-strata_comb <- round_comb %>% 
+strata_comb <- comb_df %>% 
+  mutate(lat_round = round(latitude, digits = 2)) %>% 
   slice_sample(n = 200, replace = FALSE, by = lat_round)
 
 # Check visually that the sampling worked
